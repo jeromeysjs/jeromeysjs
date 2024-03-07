@@ -1,1 +1,19 @@
 
+import pandas as pd
+input_file_path = "D:\input.csv"
+output_file_path = "D:\Output.csv"
+employee_data = pd.read_csv(input_file_path)
+employee_data['Effective Date'] = pd.to_datetime(employee_data['Effective Date'])
+employee_data['End Date'] = employee_data.groupby('Employee ID')['Effective Date'].shift(-1) - pd.Timedelta(days=1)
+employee_data['End Date'] = employee_data['End Date'].fillna(pd.Timestamp('2100-01-01'))
+row_based_data = []
+for index, row in employee_data.iterrows():
+    for col in employee_data.columns:
+        if col not in ['Employee code', 'Effective Date', 'End Date']:
+            row_based_data.append({
+                'Employee code': row['Employee code'],
+                'Effective Dat': row['Effective Date'],
+                'End Date': row['End Date'] })
+output_data = pd.DataFrame(row_based_data)
+output_data.to_csv(output_file_path, index=False)
+print("Transformation complete. Output data written to:", output_file_path)
